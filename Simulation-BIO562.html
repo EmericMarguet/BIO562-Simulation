@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Simulation - BIO562</title>
+    <!-- https://d3js.org/ -->
+    <script type="text/javascript" src="js/d3.v7.min.js"></script>
+    <script type="text/javascript" src="js/simulation.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css"
+    />
+    <link rel="icon" type="image/png" href="icon.png" />
+    <script
+      defer
+      src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.js"
+    ></script>
+    <style type="text/css">
+      body {
+        overflow: hidden;
+      }
+      .container {
+        display: flex;
+        flex-direction: row;
+        width: 100vw;
+        height: 100vh;
+
+        .simulation-container {
+          background-color: rgb(233, 233, 157);
+          width: 65vw;
+          height: 100vh;
+        }
+        .interactive-side {
+          background-color: rgb(255, 255, 255);
+          width: 35vw;
+          height: 100vh;
+
+          .model-selector {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            align-items: top;
+            height: 10%;
+            width: 100%;
+
+            .model {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              width: 25%;
+              height: 100%;
+              border: 2px solid black;
+              cursor: pointer;
+
+              h1 {
+                font-size: 2em;
+              }
+            }
+          }
+          .model-description {
+            display: flex;
+            padding-top: 2%;
+            justify-content: center;
+            align-items: center;
+            height: 7%;
+            width: 100%;
+          }
+          .model-equation {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 7%;
+            width: 100%;
+
+            div {
+              margin-bottom: 10px;
+            }
+          }
+
+          .model-parameters-legends {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            align-items: center;
+            height: 34%;
+            width: 100%;
+
+            .model-parameters {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              height: 100%;
+              width: 30%;
+              padding: 5%;
+
+              .parameters-title {
+                display: flex;
+                padding-top: 3%;
+                padding-bottom: 5%;
+                justify-content: center;
+                align-items: center;
+                font-size: large;
+                font-weight: bold;
+                height: 30px;
+              }
+              .parameter {
+                padding-left: 5px;
+                padding-top: 5px;
+                display: flex;
+                justify-content: flex-start;
+                align-items: center;
+                height: 21px;
+
+                span {
+                  font-size: medium;
+                  width: 130px;
+                }
+                .bool-input {
+                  height: 15px;
+                  width: 15px;
+                }
+                .text-input {
+                  height: 10px;
+                  width: 50px;
+                }
+              }
+            }
+            .model-legends {
+              display: flex;
+              flex-direction: column;
+              height: 100%;
+              width: 60%;
+              padding-left: 5%;
+              padding-right: 5%;
+
+              .legend-title {
+                display: flex;
+                padding-top: 3%;
+                padding-bottom: 5%;
+                justify-content: center;
+                align-items: center;
+                font-size: large;
+                font-weight: bold;
+                height: 30px;
+              }
+
+              .legend {
+                display: flex;
+                justify-content: flex-start;
+                align-items: center;
+                padding-top: 5px;
+                height: 21px;
+              }
+            }
+          }
+
+          .model-results {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            align-items: center;
+            height: 40%;
+            width: 100%;
+
+            .model-results-figure {
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              align-items: center;
+              height: 100%;
+              width: 50%;
+
+              .result-title {
+                display: flex;
+                padding-top: 3%;
+                padding-bottom: 5%;
+                justify-content: center;
+                align-items: center;
+                font-size: large;
+                font-weight: bold;
+                height: 30px;
+              }
+
+              .figure-result {
+                display: flex;
+                justify-content: left;
+                align-items: center;
+                font-size: large;
+                width: 220px;
+                padding-bottom: 3px;
+              }
+            }
+            .model-results-graph {
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              align-items: center;
+              height: 100%;
+              width: 50%;
+            }
+          }
+        }
+      }
+    </style>
+  </head>
+
+  <body onload="createViz();">
+    <div class="container">
+      <div class="simulation-container" id="simulation-container"></div>
+      <div class="interactive-side">
+        <div class="model-selector">
+          <div class="model" id="model-A" onclick="selectModel('A')">
+            <h2>Model A</h2>
+          </div>
+          <div class="model" id="model-B" onclick="selectModel('B')">
+            <h2>Model B</h2>
+          </div>
+          <div class="model" id="model-C" onclick="selectModel('C')">
+            <h2>Model C</h2>
+          </div>
+          <div class="model" id="model-D" onclick="selectModel('D')">
+            <h2>Model D</h2>
+          </div>
+        </div>
+        <div class="model-description">
+          <h3 id="description"></h3>
+        </div>
+        <div class="model-equation">
+          <div id="equation-1"></div>
+          <div id="equation-2"></div>
+        </div>
+        <div class="model-parameters-legends">
+          <div class="model-parameters">
+            <span class="parameters-title">Parameters</span>
+            <div class="parameter" id="parameter-transcription">
+              <span style="width: 173px">Pause</span>
+              <input class="bool-input" type="checkbox" id="pause-input" />
+            </div>
+            <div class="parameter" id="parameter-transcription">
+              <span style="width: 173px">Transcription</span>
+              <input
+                class="bool-input"
+                type="checkbox"
+                id="transcription-input"
+              />
+            </div>
+            <div class="parameter" id="parameter-delta-t">
+              <span>Delta t</span>
+              <input class="text-input" type="text" id="delta-t-input" />
+            </div>
+            <div class="parameter" id="parameter-alpha">
+              <span>Alpha</span>
+              <input class="text-input" type="text" id="alpha-input" />
+            </div>
+            <div class="parameter" id="parameter-beta">
+              <span>Beta</span>
+              <input class="text-input" type="text" id="beta-input" />
+            </div>
+            <div class="parameter" id="parameter-k">
+              <span>Pseudo-k</span>
+              <input class="text-input" type="text" id="k-input" />
+            </div>
+            <div class="parameter" id="parameter-gamma">
+              <span>Gamma</span>
+              <input class="text-input" type="text" id="gamma-input" />
+            </div>
+            <div class="parameter" id="parameter-delta">
+              <span>Delta</span>
+              <input class="text-input" type="text" id="delta-input" />
+            </div>
+            <div class="parameter" id="parameter-sos-1">
+              <span>Pseudo-k SOS 1</span>
+              <input class="text-input" type="text" id="sos-1-input" />
+            </div>
+            <div class="parameter" id="parameter-sos-2">
+              <span>Pseudo-k SOS 2</span>
+              <input class="text-input" type="text" id="sos-2-input" />
+            </div>
+            <div class="parameter" id="parameter-sos-3">
+              <span>Pseudo-k SOS 3</span>
+              <input class="text-input" type="text" id="sos-3-input" />
+            </div>
+            <div class="parameter" id="parameter-reca">
+              <span>recA</span>
+              <input class="text-input" type="text" id="reca-input" />
+            </div>
+          </div>
+          <div class="model-legends">
+            <span class="legend-title">Legend</span>
+            <div class="legend" id="legend-chromosome">
+              <svg width="40" height="20"></svg>
+              <span>: lexA locus in DNA</span>
+            </div>
+            <div class="legend" id="legend-lexa">
+              <svg width="40" height="20"></svg>
+              <span>: lexA</span>
+            </div>
+            <div class="legend" id="legend-operon">
+              <svg width="40" height="20"></svg>
+              <span>: lexA repressor operator</span>
+            </div>
+            <div class="legend" id="legend-reca">
+              <svg width="40" height="20"></svg>
+              <span>: activated recA</span>
+            </div>
+            <div class="legend" id="legend-plasmid">
+              <svg width="40" height="20"></svg>
+              <span>: SOS plasmid</span>
+            </div>
+            <div class="legend" id="legend-sos-graph-1">
+              <svg width="40" height="20"></svg>
+              <span>: SOS 1 response</span>
+            </div>
+            <div class="legend" id="legend-sos-graph-2">
+              <svg width="40" height="20"></svg>
+              <span>: SOS 2 response</span>
+            </div>
+            <div class="legend" id="legend-sos-graph-3">
+              <svg width="40" height="20"></svg>
+              <span>: SOS 3 response</span>
+            </div>
+          </div>
+        </div>
+        <div class="model-results">
+          <div class="model-results-figure">
+            <span class="result-title">Results</span>
+            <div class="figure-result">
+              <span id="lexa-result"></span>
+            </div>
+            <div class="figure-result">
+              <span id="lexa-result"></span>
+            </div>
+            <div class="figure-result" id="reca-result-container">
+              <span id="reca-result"></span>
+            </div>
+            <div class="figure-result" id="sos-1-result-container">
+              <span id="sos-1-result"></span>
+            </div>
+            <div class="figure-result" id="sos-2-result-container">
+              <span id="sos-2-result"></span>
+            </div>
+            <div class="figure-result" id="sos-3-result-container">
+              <span id="sos-3-result"></span>
+            </div>
+            <div class="figure-result" id="dna-damage-result-container">
+              <span id="dna-damage-result"></span>
+            </div>
+          </div>
+
+          <div class="model-results-graph">
+            <svg id="lexa-graph" width="100%" height="50%"></svg>
+            <svg id="repair-graph" width="100%" height="50%"></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
